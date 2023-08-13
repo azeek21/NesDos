@@ -13,6 +13,5 @@ export class CreateTodoDto {
   @IsBoolean()
   done: boolean;
 
-  @IsOptional()
   ownerId: number;
 }

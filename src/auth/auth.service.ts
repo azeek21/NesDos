@@ -7,6 +7,7 @@ import { JwtService } from "@nestjs/jwt";
 import { UsersService } from "src/users/users.service";
 import { ConfigService } from "@nestjs/config";
 import { Prisma, User } from "@prisma/client";
+import { Response } from "express";
 
 @Injectable()
 export class AuthService {
@@ -16,28 +17,29 @@ export class AuthService {
     private configService: ConfigService,
   ) {}
 
-  private async makeUserJwtAsync(user: User) {
+  private async makeUserJwtAsync(user: User, res: Response) {
     delete user.password;
-
+    const token = await this.jwtService.signAsync({
+      sub: user.id,
+      name: user.name,
+      email: user.email,
+    });
+    res.setHeader("authorization", `Bearer ${token}`);
     return {
-      access_token: await this.jwtService.signAsync({
-        sub: user.id,
-        name: user.name,
-        email: user.email,
-      }),
+      success: true,
     };
   }
 
-  async signIn(email: string, password: string) {
+  async signIn(email: string, password: string, res: Response) {
     const user = await this.userService.findOne({ email: email });
     if (user.password !== password) {
       throw new UnauthorizedException();
     }
 
-    return this.makeUserJwtAsync(user);
+    return this.makeUserJwtAsync(user, res);
   }
 
-  async signUp(data: Prisma.UserCreateInput) {
+  async signUp(data: Prisma.UserCreateInput, res: Response) {
     let user = await this.userService.findOne({ email: data.email });
     if (user) {
       throw new ConflictException("Email already registered");
@@ -46,12 +48,14 @@ export class AuthService {
     // TODO: IMPLEMENT BCRYPT PASSWORD
     user = await this.userService.create(data);
 
-    return this.makeUserJwtAsync(user);
+    return this.makeUserJwtAsync(user, res);
   }
 
-  async signOut() {
+  async signOut(res: Response) {
     return {
-      access_token: "",
+      headers: {
+        authorization: "",
+      },
     };
   }
 }

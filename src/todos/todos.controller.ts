@@ -16,7 +16,6 @@ import { CreateTodoDto } from "./dto/create-todo.dto";
 import { UpdateTodoDto } from "./dto/update-todo.dto";
 import { AuthGuard } from "src/auth/auth.guard";
 import { AuthedRequest } from "src/auth/types";
-import { Todo } from "@prisma/client";
 
 @Controller("todos")
 export class TodosController {
@@ -68,22 +67,24 @@ export class TodosController {
     @Body() updateTodoDto: UpdateTodoDto,
     @Request() req: AuthedRequest,
   ) {
-    try {
-      return this.todosService.update({
-        where: { id: Number(id), ownerId: req.user.id },
-        data: updateTodoDto,
-      });
-    } catch {
-      throw new NotFoundException();
-    }
+    return this.todosService.update({
+      where: { id: Number(id), ownerId: req.user.id },
+      data: updateTodoDto,
+    });
   }
 
+  @UseGuards(AuthGuard)
   @Delete(":id")
-  delete(@Param("id") id: string) {
-    try {
-      return this.todosService.delete({ id: Number(id) });
-    } catch {
-      throw new NotFoundException("No such todo");
+  async delete(@Param("id") id: string, @Request() req: AuthedRequest) {
+    const deleted = await this.todosService.delete({
+      id: Number(id),
+      ownerId: req.user.id,
+    });
+    if (deleted.count > 0) {
+      return {
+        deleted: true,
+      };
     }
+    throw new NotFoundException("No such todo");
   }
 }

@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { CreateTodoDto } from "./dto/create-todo.dto";
 import { UpdateTodoDto } from "./dto/update-todo.dto";
 import { Prisma, Todo } from "@prisma/client";
@@ -17,9 +17,13 @@ export class TodosService {
   constructor(private prisma: PrismaService) {}
 
   async create(data: Prisma.TodoUncheckedCreateInput) {
-    return this.prisma.todo.create({
-      data,
-    });
+    try {
+      return this.prisma.todo.create({
+        data,
+      });
+    } catch {
+      throw new NotFoundException("No such todo");
+    }
   }
 
   async findAll(params?: IfindAllParams) {
@@ -33,9 +37,13 @@ export class TodosService {
   }
 
   async findOne(todoWhereUniqueInput: Prisma.TodoWhereUniqueInput) {
-    return this.prisma.todo.findUnique({
-      where: todoWhereUniqueInput,
-    });
+    try {
+      return this.prisma.todo.findUnique({
+        where: todoWhereUniqueInput,
+      });
+    } catch {
+      throw new NotFoundException("No such todo");
+    }
   }
 
   async update(params: {
@@ -43,15 +51,23 @@ export class TodosService {
     data: Prisma.TodoUpdateInput;
   }) {
     const { data, where } = params;
-    return this.prisma.todo.update({
-      where,
-      data,
-    });
+    try {
+      return this.prisma.todo.update({
+        where,
+        data,
+      });
+    } catch {
+      throw new NotFoundException("No such todo");
+    }
   }
 
   async delete(where: Prisma.TodoWhereUniqueInput) {
-    return this.prisma.todo.delete({
-      where,
-    });
+    try {
+      return this.prisma.todo.deleteMany({
+        where,
+      });
+    } catch {
+      throw new NotFoundException("No such todo");
+    }
   }
 }
