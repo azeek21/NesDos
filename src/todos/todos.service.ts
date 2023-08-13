@@ -16,13 +16,13 @@ interface IfindAllParams {
 export class TodosService {
   constructor(private prisma: PrismaService) {}
 
-  async create(data: Prisma.TodoCreateInput): Promise<Todo> {
+  async create(data: Prisma.TodoUncheckedCreateInput) {
     return this.prisma.todo.create({
       data,
     });
   }
 
-  async findAll(params?: IfindAllParams): Promise<Todo[]> {
+  async findAll(params?: IfindAllParams) {
     return this.prisma.todo.findMany({
       skip: params?.skip,
       take: params?.take,
@@ -32,9 +32,7 @@ export class TodosService {
     });
   }
 
-  async findOne(
-    todoWhereUniqueInput: Prisma.TodoWhereUniqueInput,
-  ): Promise<Todo | null> {
+  async findOne(todoWhereUniqueInput: Prisma.TodoWhereUniqueInput) {
     return this.prisma.todo.findUnique({
       where: todoWhereUniqueInput,
     });
@@ -43,7 +41,7 @@ export class TodosService {
   async update(params: {
     where: Prisma.TodoWhereUniqueInput;
     data: Prisma.TodoUpdateInput;
-  }): Promise<Todo> {
+  }) {
     const { data, where } = params;
     return this.prisma.todo.update({
       where,
@@ -51,7 +49,7 @@ export class TodosService {
     });
   }
 
-  async delete(where: Prisma.TodoWhereUniqueInput): Promise<Todo> {
+  async delete(where: Prisma.TodoWhereUniqueInput) {
     return this.prisma.todo.delete({
       where,
     });

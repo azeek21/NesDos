@@ -6,7 +6,7 @@ import {
 import { JwtService } from "@nestjs/jwt";
 import { UsersService } from "src/users/users.service";
 import { ConfigService } from "@nestjs/config";
-import { Prisma } from "@prisma/client";
+import { Prisma, User } from "@prisma/client";
 
 @Injectable()
 export class AuthService {
@@ -16,9 +16,15 @@ export class AuthService {
     private configService: ConfigService,
   ) {}
 
-  private async returnJwtAsnyc(payload: any) {
+  private async makeUserJwtAsync(user: User) {
+    delete user.password;
+
     return {
-      access_token: await this.jwtService.signAsync(payload),
+      access_token: await this.jwtService.signAsync({
+        sub: user.id,
+        name: user.name,
+        email: user.email,
+      }),
     };
   }
 
@@ -27,10 +33,8 @@ export class AuthService {
     if (user.password !== password) {
       throw new UnauthorizedException();
     }
-    delete user.password;
-    const payload = { sub: user.id, email: user.email, name: user.name };
 
-    return this.returnJwtAsnyc(payload);
+    return this.makeUserJwtAsync(user);
   }
 
   async signUp(data: Prisma.UserCreateInput) {
@@ -41,13 +45,8 @@ export class AuthService {
 
     // TODO: IMPLEMENT BCRYPT PASSWORD
     user = await this.userService.create(data);
-    delete user.password;
-    const payload = {
-      sub: user.id,
-      email: user.email,
-      name: user.name,
-    };
-    return this.returnJwtAsnyc(payload);
+
+    return this.makeUserJwtAsync(user);
   }
 
   async signOut() {

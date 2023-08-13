@@ -1,9 +1,18 @@
-import { Prisma } from "@prisma/client";
+import { IsOptional, MaxLength, IsDefined, IsBoolean } from "class-validator";
 
-export class CreateTodoDto implements Prisma.TodoCreateInput {
+export class CreateTodoDto {
+  @MaxLength(255, {
+    message: "Todo title can't be longer than 255 chars",
+  })
   title: string;
-  ownerId: number;
+
+  @IsDefined()
   content: string;
+
+  @IsDefined()
+  @IsBoolean()
   done: boolean;
-  owner: Prisma.UserCreateNestedOneWithoutTodosInput;
+
+  @IsOptional()
+  ownerId: number;
 }
