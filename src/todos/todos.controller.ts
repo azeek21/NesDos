@@ -25,9 +25,6 @@ export class TodosController {
   @Post()
   create(@Body() createTodoDto: CreateTodoDto, @Request() req: AuthedRequest) {
     const user = req.user;
-    if (!user) {
-      throw new UnauthorizedException();
-    }
 
     // inject ownerId from user.id
     createTodoDto.ownerId = user.id;
@@ -67,10 +64,14 @@ export class TodosController {
     @Body() updateTodoDto: UpdateTodoDto,
     @Request() req: AuthedRequest,
   ) {
-    return this.todosService.update({
-      where: { id: Number(id), ownerId: req.user.id },
-      data: updateTodoDto,
-    });
+    try {
+      return await this.todosService.update({
+        where: { id: Number(id), ownerId: req.user.id },
+        data: updateTodoDto,
+      });
+    } catch {
+      throw new NotFoundException();
+    }
   }
 
   @UseGuards(AuthGuard)

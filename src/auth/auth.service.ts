@@ -24,7 +24,7 @@ export class AuthService {
       name: user.name,
       email: user.email,
     });
-    res.setHeader("authorization", `Bearer ${token}`);
+    res.setHeader("Authorization", `Bearer ${token}`);
     return {
       success: true,
     };
@@ -35,7 +35,6 @@ export class AuthService {
     if (user.password !== password) {
       throw new UnauthorizedException();
     }
-
     return this.makeUserJwtAsync(user, res);
   }
 
