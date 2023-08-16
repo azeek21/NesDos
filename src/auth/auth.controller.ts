@@ -20,7 +20,7 @@ export class AuthController {
 
   @Post("login")
   signIn(@Body() body: SignInDto, @Res({ passthrough: true }) res: Response) {
-    console.log(body);
+    console.log("login: ", body);
     return this.auth.signIn(body.email, body.password, res);
   }
 

@@ -32,7 +32,8 @@ export class AuthService {
 
   async signIn(email: string, password: string, res: Response) {
     const user = await this.userService.findOne({ email: email });
-    if (user.password !== password) {
+
+    if (!user || user.password !== password) {
       throw new UnauthorizedException();
     }
     return this.makeUserJwtAsync(user, res);
