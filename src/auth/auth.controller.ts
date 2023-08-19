@@ -24,11 +24,12 @@ export class AuthController {
     return this.auth.signIn(body.email, body.password, res);
   }
 
-  @Post("register")
+  @Post("signup")
   srignUp(@Body() body: SignUpTdo, @Res({ passthrough: true }) res: Response) {
     return this.auth.signUp(body, res);
   }
 
+  @UseGuards(AuthGuard)
   @Post("logout")
   signOut(@Res({ passthrough: true }) res: Response) {
     return this.auth.signOut(res);

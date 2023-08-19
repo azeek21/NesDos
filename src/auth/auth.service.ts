@@ -26,6 +26,7 @@ export class AuthService {
     });
     res.cookie("jwt", token, {
       maxAge: this.configService.get("JWT_MAX_AGE_IN_MS"),
+      path: "/",
       httpOnly: true,
     });
     return {
@@ -55,8 +56,11 @@ export class AuthService {
   }
 
   async signOut(res: Response) {
-    return res.cookie("jwt", "", {
+    res.cookie("jwt", "", {
       maxAge: -1,
     });
+    return {
+      success: true,
+    };
   }
 }

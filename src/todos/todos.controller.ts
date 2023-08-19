@@ -39,6 +39,9 @@ export class TodosController {
       where: {
         ownerId: req.user.id,
       },
+      orderBy: {
+        id: "asc",
+      },
     });
   }
 
