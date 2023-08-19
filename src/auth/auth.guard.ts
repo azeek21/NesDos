@@ -15,14 +15,15 @@ export class AuthGuard implements CanActivate {
     private configService: ConfigService,
   ) {}
 
-  private extractTokenFromHeader(request: Request): string | undefined {
-    const [type, token] = request.headers.authorization?.split(" ") ?? [];
-    return type === "Bearer" ? token : undefined;
+  private extractJwjtFromCookie(request: Request): string | undefined {
+    let token = request.cookies["jwt"];
+    return token;
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest();
-    const token = this.extractTokenFromHeader(req);
+    const token = this.extractJwjtFromCookie(req);
+
     if (!token) {
       throw new UnauthorizedException();
     }

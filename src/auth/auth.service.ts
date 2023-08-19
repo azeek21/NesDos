@@ -24,9 +24,12 @@ export class AuthService {
       name: user.name,
       email: user.email,
     });
-    res.setHeader("Authorization", `Bearer ${token}`);
+    res.cookie("jwt", token, {
+      maxAge: this.configService.get("JWT_MAX_AGE_IN_MS"),
+      httpOnly: true,
+    });
     return {
-      success: true,
+      ...user,
     };
   }
 
@@ -52,10 +55,8 @@ export class AuthService {
   }
 
   async signOut(res: Response) {
-    return {
-      headers: {
-        authorization: "",
-      },
-    };
+    return res.cookie("jwt", "", {
+      maxAge: -1,
+    });
   }
 }
