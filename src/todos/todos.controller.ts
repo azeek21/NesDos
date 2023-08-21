@@ -16,13 +16,23 @@ import { CreateTodoDto } from "./dto/create-todo.dto";
 import { UpdateTodoDto } from "./dto/update-todo.dto";
 import { AuthGuard } from "src/auth/auth.guard";
 import { AuthedRequest } from "src/auth/types";
+import {
+  ApiCookieAuth,
+  ApiOkResponse,
+  ApiCreatedResponse,
+  ApiTags,
+} from "@nestjs/swagger";
+import { TodoDeletedEntity, TodoEntity } from "./entities/todo.entity";
 
 @Controller("todos")
+@ApiCookieAuth("jwt")
+@ApiTags("todos")
 export class TodosController {
   constructor(private readonly todosService: TodosService) {}
 
   @UseGuards(AuthGuard)
   @Post()
+  @ApiCreatedResponse({ type: TodoEntity })
   create(@Body() createTodoDto: CreateTodoDto, @Request() req: AuthedRequest) {
     const user = req.user;
 
@@ -34,6 +44,7 @@ export class TodosController {
 
   @UseGuards(AuthGuard)
   @Get()
+  @ApiOkResponse({ type: TodoEntity })
   findAll(@Request() req: AuthedRequest) {
     return this.todosService.findAll({
       where: {
@@ -47,6 +58,7 @@ export class TodosController {
 
   @UseGuards(AuthGuard)
   @Get(":id")
+  @ApiOkResponse({ type: TodoEntity })
   async findOne(@Param("id") id: string, @Request() req: AuthedRequest) {
     const todo = await this.todosService.findOne({
       id: Number(id),
@@ -62,6 +74,7 @@ export class TodosController {
 
   @UseGuards(AuthGuard)
   @Patch(":id")
+  @ApiOkResponse({ type: TodoEntity })
   async update(
     @Param("id") id: string,
     @Body() updateTodoDto: UpdateTodoDto,
@@ -79,6 +92,7 @@ export class TodosController {
 
   @UseGuards(AuthGuard)
   @Delete(":id")
+  @ApiOkResponse({ type: TodoDeletedEntity })
   async delete(@Param("id") id: string, @Request() req: AuthedRequest) {
     const deleted = await this.todosService.delete({
       id: Number(id),
