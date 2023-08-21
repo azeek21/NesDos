@@ -44,7 +44,7 @@ export class TodosController {
 
   @UseGuards(AuthGuard)
   @Get()
-  @ApiOkResponse({ type: TodoEntity })
+  @ApiOkResponse({ type: TodoEntity, isArray: true })
   findAll(@Request() req: AuthedRequest) {
     return this.todosService.findAll({
       where: {
