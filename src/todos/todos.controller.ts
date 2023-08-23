@@ -24,13 +24,13 @@ import {
 } from "@nestjs/swagger";
 import { TodoDeletedEntity, TodoEntity } from "./entities/todo.entity";
 
-@Controller("todos")
 @ApiCookieAuth("jwt")
 @ApiTags("todos")
+@UseGuards(AuthGuard)
+@Controller("todos")
 export class TodosController {
   constructor(private readonly todosService: TodosService) {}
 
-  @UseGuards(AuthGuard)
   @Post()
   @ApiCreatedResponse({ type: TodoEntity })
   create(@Body() createTodoDto: CreateTodoDto, @Request() req: AuthedRequest) {
@@ -42,7 +42,6 @@ export class TodosController {
     return this.todosService.create(createTodoDto);
   }
 
-  @UseGuards(AuthGuard)
   @Get()
   @ApiOkResponse({ type: TodoEntity, isArray: true })
   findAll(@Request() req: AuthedRequest) {
@@ -56,7 +55,6 @@ export class TodosController {
     });
   }
 
-  @UseGuards(AuthGuard)
   @Get(":id")
   @ApiOkResponse({ type: TodoEntity })
   async findOne(@Param("id") id: string, @Request() req: AuthedRequest) {
@@ -72,7 +70,6 @@ export class TodosController {
     return todo;
   }
 
-  @UseGuards(AuthGuard)
   @Patch(":id")
   @ApiOkResponse({ type: TodoEntity })
   async update(
@@ -90,7 +87,6 @@ export class TodosController {
     }
   }
 
-  @UseGuards(AuthGuard)
   @Delete(":id")
   @ApiOkResponse({ type: TodoDeletedEntity })
   async delete(@Param("id") id: string, @Request() req: AuthedRequest) {

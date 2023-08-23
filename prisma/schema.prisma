@@ -8,18 +8,29 @@ datasource db {
 }
 
 model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String? @default("guest")
-  password String @default("admin")
-  todos Todo[]
+  id        Int     @id @default(autoincrement())
+  email     String  @unique
+  name      String? @default("guest")
+  password  String @default("admin")
+  todos     Todo[]
+  settings  Settings[]
+}
+
+model Settings {
+  id        Int     @id @default(autoincrement())
+  key       String  @db.VarChar(255) @unique()
+  value     String
+  type      String  @default("string")
+  allowed   String[] @default([])
+  userId    Int
+  user      User   @relation(fields: [userId], references: [id])
 }
 
 model Todo {
-  id      Int     @id @default(autoincrement())
-  title   String  @default("")
-  content String  @default("")
-  done    Boolean @default(false)
-  ownerId Int
-  owner   User    @relation(fields: [ownerId], references: [id])
+  id        Int     @id @default(autoincrement())
+  title     String  @default("")
+  content   String  @default("")
+  done      Boolean @default(false)
+  ownerId   Int
+  owner     User    @relation(fields: [ownerId], references: [id])
 }

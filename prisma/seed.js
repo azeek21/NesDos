@@ -3,52 +3,32 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 async function main() {
-  let users = [];
-  let todos = [];
-  let userId;
-  for (let i = 0; i < 10; i++) {
-    let userData = {
-      email: `user${i}@example.com`,
-      name: `User${i}`,
-    };
-
-    let user = await prisma.user.upsert({
-      where: {
-        email: userData.email,
+  const users = await prisma.user.findMany();
+  for (let i = 0; i < users.length; i++) {
+    console.log(
+      "creating settings for: ",
+      users[i].name,
+      " - ",
+      users[i].email,
+    );
+    prisma.settings.create({
+      data: {
+        key: "todoListViewType",
+        type: "string",
+        allowed: ["card", "list"],
+        value: "list",
+        userId: users[i].id,
       },
-      update: {},
-      create: userData,
     });
-
-    userId = user.id;
-
-    let todoData = {
-      title: `Todo number ${i}`,
-      content: `Content for todo number ${i}`,
-      done: i % 2 == 0,
-      ownerId: userId,
-    };
-    let todo = await prisma.todo.create({
-      data: todoData,
-    });
-
-    users.push(user);
-    todos.push(todo);
   }
-
-  console.table(users);
-  console.table(todos);
 }
 
-main()
-  .catch((e) => {
-    console.error(e);
-
-    process.exit(1);
-  })
-
-  .finally(async () => {
-    // close Prisma Client at the end
-
-    await prisma.$disconnect();
-  });
+// main()
+//   .catch((e) => {
+//     console.error(e);
+//     process.exit(1);
+//   })
+//   .finally(async () => {
+//     // close Prisma Client at the end
+//     await prisma.$disconnect();
+//   });

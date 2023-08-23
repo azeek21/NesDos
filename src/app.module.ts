@@ -8,6 +8,9 @@ import { PrismaModule } from "./prisma/prisma.module";
 import { AuthModule } from "./auth/auth.module";
 import { UsersModule } from "./users/users.module";
 import { ConfigModule } from "@nestjs/config";
+import { SettingsController } from "./settings/settings.controller";
+import { SettingsModule } from "./settings/settings.module";
+import { SettingsService } from "./settings/settings.service";
 
 @Module({
   imports: [
@@ -16,8 +19,9 @@ import { ConfigModule } from "@nestjs/config";
     UsersModule,
     TodosModule,
     ConfigModule.forRoot({ isGlobal: true }),
+    SettingsModule,
   ],
-  controllers: [AppController, TodosController],
-  providers: [AppService, TodosService],
+  controllers: [AppController, TodosController, SettingsController],
+  providers: [AppService, TodosService, SettingsService],
 })
 export class AppModule {}

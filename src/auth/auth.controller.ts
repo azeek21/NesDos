@@ -29,7 +29,6 @@ export class AuthController {
   @Post("login")
   @ApiOkResponse({ type: userEntity })
   signIn(@Body() body: SignInDto, @Res({ passthrough: true }) res: Response) {
-    console.log("login: ", body);
     return this.auth.signIn(body.email, body.password, res);
   }
 
@@ -40,6 +39,7 @@ export class AuthController {
   }
 
   @UseGuards(AuthGuard)
+  @ApiCookieAuth("jwt")
   @Post("logout")
   @ApiOkResponse({ type: logoutEntity })
   signOut(@Res({ passthrough: true }) res: Response) {
