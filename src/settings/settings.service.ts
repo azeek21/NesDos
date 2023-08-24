@@ -44,7 +44,16 @@ export class SettingsService {
     userId: number,
   ) {
     updateSettingDto.key = key;
-    const res = await this.prisma.setSetting({ ...updateSettingDto, userId });
+    const res = await this.prisma.settings.update({
+      where: {
+        key: updateSettingDto.key,
+        userId: userId,
+      },
+      data: {
+        key: updateSettingDto.key,
+        value: updateSettingDto.value,
+      },
+    });
     return res;
   }
 

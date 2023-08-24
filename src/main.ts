@@ -17,13 +17,7 @@ async function bootstrap() {
   );
   app.use(cookieParser());
   app.enableCors({
-    origin: [
-      "http://localhost:3000",
-      "http://localhost:3001",
-      "http://0.0.0.0",
-      "0.0.0.0",
-      "http://locahlost",
-    ],
+    origin: true,
     credentials: true,
   });
   const swaggerConfig = new DocumentBuilder()
