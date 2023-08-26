@@ -1,1 +1,1 @@
-export class Setting {}
+export default class {}

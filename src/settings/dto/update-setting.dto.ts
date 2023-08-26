@@ -1,8 +1,9 @@
-import { PartialType } from "@nestjs/swagger";
-import { CreateSettingDto } from "./create-setting.dto";
-import { IsOptional } from "class-validator";
+import { IsDefined, IsOptional, IsString, isDefined } from "class-validator";
 
-export class UpdateSettingDto extends CreateSettingDto {
-  @IsOptional()
-  allowed: string[];
+export default class UpdateSettingsDto {
+  @IsString()
+  key: string;
+
+  @IsDefined()
+  value: any;
 }

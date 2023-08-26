@@ -2,25 +2,21 @@ const { PrismaClient } = require("@prisma/client");
 
 const prisma = new PrismaClient();
 
+const defaultSettings = [
+  {
+    name: "listViewStyle",
+    value: "list",
+    allowed: ["list", "card"],
+  },
+];
+
 async function main() {
-  const users = await prisma.user.findMany();
-  for (let i = 0; i < users.length; i++) {
-    console.log(
-      "creating settings for: ",
-      users[i].name,
-      " - ",
-      users[i].email,
-    );
-    prisma.settings.create({
-      data: {
-        key: "todoListViewType",
-        type: "string",
-        allowed: ["card", "list"],
-        value: "list",
-        userId: users[i].id,
-      },
-    });
-  }
+  await prisma.user.updateMany({
+    data: {
+      settings: JSON.stringify(defaultSettings),
+    },
+  });
+  console.log("SEEDING done");
 }
 
 // main()

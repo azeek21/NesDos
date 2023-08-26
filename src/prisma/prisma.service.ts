@@ -1,105 +1,142 @@
 import { Injectable } from "@nestjs/common";
-import { PrismaClient, Settings } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 
-export type settingsTypes = "string" | "object" | "boolean" | "number";
+const DEFALUT_USER_SETTINGS = [
+  {
+    name: "listViewStyle",
+    value: "list",
+    allowed: ["list", "card"],
+  },
+];
 
-type Isettings = {
-  key: string;
-  value: any;
-  userId: number;
-} & (
-  | {
-      create: true;
-      allowed: string[];
-      type: settingsTypes;
+type TuserSettings = typeof DEFALUT_USER_SETTINGS;
+type TsingleUserSetting = Record<string, any>;
+
+@Injectable()
+export class PrismaService extends PrismaClient {
+  _verifySetting(key: string, value: any) {
+    const setting = DEFALUT_USER_SETTINGS.find((s) => s.name === key);
+    if (!setting) {
+      return false;
     }
-  | {
-      create?: false;
-      type?: settingsTypes;
-      allowed?: string[];
+
+    if (typeof setting.value !== typeof value) {
+      return false;
     }
-);
 
-function fromAnyToString(value: any, fromType: settingsTypes) {
-  if (fromType == "boolean") {
-    return "false";
-  }
-  if (fromType == "number") {
-    return String(value);
-  }
-  if (fromType == "object") {
-    return JSON.stringify(value);
-  }
-  return String(value);
-}
-
-function fromStringToType(value: string, toType: settingsTypes) {
-  if (toType == "object") {
-    return JSON.parse(value);
-  }
-  if (toType == "number") {
-    return Number(value);
-  }
-  if (toType == "boolean") {
-    if (
-      value == "false" ||
-      value == "undefined" ||
-      value == "none" ||
-      value == "unknown"
-    ) {
+    if (!setting.allowed.includes(value)) {
       return false;
     }
     return true;
   }
-  return value;
-}
 
-@Injectable()
-export class PrismaService extends PrismaClient {
-  async setSetting(options: Isettings) {
-    options.value = fromAnyToString(options.value, options.type);
-
-    if (options.create) {
-      return this.settings.create({
-        data: {
-          key: options.key,
-          value: options.value,
-          allowed: options.allowed,
-          userId: options.userId,
-          type: options.type,
-        },
-      });
+  _verifySettingArray(array: TsingleUserSetting[]) {
+    if (array.length > DEFALUT_USER_SETTINGS.length) {
+      return false;
     }
 
-    return this.settings.update({
-      where: {
-        key: options.key,
-        userId: options.userId,
-      },
-      data: {
-        value: options.value,
-        type: options.type,
-        allowed: options.allowed,
-      },
-    });
+    for (let setting of array) {
+      if (!setting.key || setting.value === undefined) {
+        return false;
+      }
+      if (!this._verifySetting(setting.key, setting.value)) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
-  async getSetting({ key, userId }: { key: string; userId: number }) {
-    const setting = await this.settings.findFirst({
+  async findAllSettings(userId: number): Promise<TsingleUserSetting> {
+    const user = await this.user.findFirst({
       where: {
-        key: key,
-        userId: userId,
+        id: userId,
+      },
+      select: {
+        settings: true,
       },
     });
-    return fromStringToType(setting.value, setting.type as settingsTypes);
+    const settings: TuserSettings = JSON.parse(user.settings);
+    const res = {};
+    for (let set of settings) {
+      res[set.name] = set.value;
+    }
+    return res;
+  }
+
+  async findFirstSetting(
+    userId: number,
+    key: string,
+  ): Promise<TsingleUserSetting | null> {
+    const user = await this.user.findFirst({
+      where: { id: userId },
+      select: { settings: true },
+    });
+    const settings: TuserSettings = JSON.parse(user.settings);
+    const res = settings.find((set) => set.name == key);
+    if (res) {
+      return {
+        [res.name]: res.value,
+      };
+    }
+    return null;
+  }
+
+  async updateOneSetting(
+    userId: number,
+    key: string,
+    value: any,
+  ): Promise<TsingleUserSetting | null> {
+    if (!this._verifySetting(key, value)) {
+      return null;
+    }
+
+    const user = await this.user.findFirst({
+      where: { id: userId },
+      select: { settings: true },
+    });
+
+    const allUserSettings: TuserSettings = JSON.parse(user.settings);
+    const toBeUpdated = allUserSettings.find((s) => s.name === key);
+    toBeUpdated.value = value;
+    const settingsString = JSON.stringify(allUserSettings);
+    await this.user.update({
+      where: { id: userId },
+      data: {
+        settings: settingsString,
+      },
+    });
+    return {
+      [key]: value,
+    };
+  }
+
+  async updateManySettings(
+    userId: number,
+    settingsArray: TsingleUserSetting[],
+  ) {
+    if (!this._verifySettingArray(settingsArray)) {
+      return null;
+    }
+
+    const user = await this.user.findFirst({
+      where: { id: userId },
+      select: { settings: true },
+    });
+    const userSettings: TuserSettings = JSON.parse(user.settings);
+
+    for (let set of settingsArray) {
+      const cur = userSettings.find((s) => s.name == set.key);
+      cur.value = set.value;
+    }
+
+    await this.user.update({
+      where: { id: userId },
+      data: {
+        settings: JSON.stringify(userSettings),
+      },
+    });
+
+    return settingsArray;
   }
 }
-
-const listOfCurrentSettings = [
-  {
-    key: "todoListViewType",
-    type: "string",
-    allowed: ["card", "list"],
-    default: "list",
-  },
-];
