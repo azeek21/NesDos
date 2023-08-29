@@ -45,9 +45,29 @@ export class TodosController {
   @Get()
   @ApiOkResponse({ type: TodoEntity, isArray: true })
   findAll(@Request() req: AuthedRequest) {
+    const searchString = String(req.query.search);
+    const done = req.query.done ? Boolean(req.query.done) : undefined;
+
     return this.todosService.findAll({
       where: {
         ownerId: req.user.id,
+        AND: {
+          OR: [
+            {
+              title: {
+                contains: searchString,
+                mode: "insensitive",
+              },
+            },
+            {
+              content: {
+                contains: searchString,
+                mode: "insensitive",
+              },
+            },
+          ],
+        },
+        done: done,
       },
       orderBy: {
         id: "asc",
