@@ -4,8 +4,8 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url = env("POSTGRES_PRISMA_URL") // uses connection pooling for vercel
-  directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection for vercel
+  url = env("DATABASE_URL") // uses connection pooling for vercel
+  // directUrl = env("POSTGRES_URL_NON_POOLING") // uses a direct connection for vercel
   // if you are not planning to use vercel for storage, you may only need url.
   // make sure to change it in .env file and here.
 }
