@@ -65,6 +65,8 @@ fabric.properties
 *.userprefs
 
 # Build results
+dist/
+/dist/
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/

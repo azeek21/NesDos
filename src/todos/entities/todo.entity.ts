@@ -15,6 +15,12 @@ export class TodoEntity implements Todo {
 
   @ApiProperty({ required: false, nullable: true })
   ownerId: number;
+
+  @ApiProperty({ required: false, nullable: true })
+  updatedAt: Date;
+
+  @ApiProperty({ required: false, nullable: true })
+  createdAt: Date;
 }
 
 export class TodoDeletedEntity {

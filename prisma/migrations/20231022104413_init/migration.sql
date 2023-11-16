@@ -3,6 +3,8 @@ CREATE TABLE "User" (
     "id" SERIAL NOT NULL,
     "email" TEXT NOT NULL,
     "name" TEXT DEFAULT 'guest',
+    "password" TEXT NOT NULL DEFAULT 'admin',
+    "settings" TEXT NOT NULL DEFAULT '',
 
     CONSTRAINT "User_pkey" PRIMARY KEY ("id")
 );
